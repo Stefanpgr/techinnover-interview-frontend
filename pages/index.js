@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import moment from "moment";
+import axios from "axios";
 
 function Home() {
   const [name, setName] = useState("");
@@ -11,15 +12,46 @@ function Home() {
   const [photograph, setPhoto] = useState("");
   const [error, setError] = useState({});
 
-  useEffect(() => {
+  const handleFormChange = useCallback(async (e) => {
     let age = moment().diff(moment(dateOfBirth, "YYYYMMDD"), "years");
-    console.log(age);
-  });
+    let file = Array.from(e.target.files);
+    let formdata = new FormData();
+    file.map((_file, index) => formdata.append(index, _file));
 
-  const handleFormChange = useCallback((e) => {
-    let age = moment().diff(moment(dateOfBirth, "YYYYMMDD"), "years");
-    if (dateOfBirth !== new Date().toISOString().substring(0, 10) && age < 18) {
-      setError({ message: "Age is less than 18" });
+    let payload = {
+      name: "olohundare nasiruden",
+      email: "admin@gmail.com",
+      age: 18,
+      dateOfBirth: "2018",
+      family: [
+        {
+          name: "Olohundare kolawole",
+          relationship: "father",
+          age: 51,
+        },
+        {
+          name: "Olohundare zainab",
+          relationship: "sister",
+          age: 21,
+        },
+      ],
+    };
+
+    const options = {
+      url: `http://localhost:5000/user/create`,
+      headers: {
+        "content-type": "application/json",
+        "cache-control": "no-cache",
+      },
+      method: "POST",
+      data: payload,
+    };
+
+    try {
+      const res = await axios.request(options);
+      console.log(res.data);
+    } catch (error) {
+      console.log(error);
     }
   });
 
@@ -65,7 +97,12 @@ function Home() {
             </div>
             <div className="form-group">
               <label>Photograph*</label>
-              <input type="file" name="photograph" className="form-control" />
+              <input
+                type="file"
+                name="photograph"
+                className="form-control"
+                onChange={handleFormChange}
+              />
             </div>
           </form>
         </div>
