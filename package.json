@@ -1,10 +1,19 @@
 {
-  "name": "client",
+  "name": "techinnover-frontend",
   "version": "1.0.0",
-  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "author": "iamnasirudeen",
   "license": "MIT",
   "dependencies": {
+    "@zeit/next-css": "^1.0.1",
+    "axios": "^0.20.0",
+    "moment": "^2.29.1",
     "next": "^9.5.5",
+    "nprogress": "^0.2.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1"
   }
