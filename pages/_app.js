@@ -2,6 +2,7 @@ import Router from "next/router";
 import NProgress from "nprogress"; //nprogress module
 import "nprogress/nprogress.css"; //styles of nprogress
 import "../public/progress.css";
+import "../public/antd-custom.less";
 import Head from "next/head";
 
 //Binding events.

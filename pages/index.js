@@ -1,110 +1,160 @@
 import React, { useState, useCallback, useEffect } from "react";
+import { Form, Input, Button, DatePicker, Space, InputNumber, Upload } from 'antd';
+import { MinusCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import moment from "moment";
-import axios from "axios";
+
 
 function Home() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [dateOfBirth, setDOB] = useState(
-    new Date().toISOString().substring(0, 10)
-  );
-  const [family, setFamily] = useState([""]);
+  
   const [photograph, setPhoto] = useState("");
   const [error, setError] = useState({});
+  const [form] = Form.useForm();
 
-  const handleFormChange = useCallback(async (e) => {
-    let age = moment().diff(moment(dateOfBirth, "YYYYMMDD"), "years");
-    let file = Array.from(e.target.files);
-    let formdata = new FormData();
-    file.map((_file, index) => formdata.append(index, _file));
+const onFinish = (values) => {
+  const formData = {...values, dateOfBirth: moment(values.dateOfBirth).format(), photograph}
+console.log(formData)
+// const options = {
+//   url: `http://localhost:5000/user/create`,
+//   headers: {
+//     "content-type": "application/json",
+//     "cache-control": "no-cache",
+//   },
+//   method: "POST",
+//   data: formData,
+// };
 
-    let payload = {
-      name: "olohundare nasiruden",
-      email: "admin@gmail.com",
-      age: 18,
-      dateOfBirth: "2018",
-      family: [
-        {
-          name: "Olohundare kolawole",
-          relationship: "father",
-          age: 51,
-        },
-        {
-          name: "Olohundare zainab",
-          relationship: "sister",
-          age: 21,
-        },
-      ],
-    };
-
-    const options = {
-      url: `http://localhost:5000/user/create`,
-      headers: {
-        "content-type": "application/json",
-        "cache-control": "no-cache",
-      },
-      method: "POST",
-      data: payload,
-    };
-
-    try {
-      const res = await axios.request(options);
-      console.log(res.data);
-    } catch (error) {
-      console.log(error);
-    }
-  });
+// try {
+//   const res = await axios.request(options);
+//   console.log(res.data);
+// } catch (error) {
+//   console.log(error);
+// }
+}
+const props = {
+  onRemove: file => {
+      const index = photograph.indexOf(file);
+      const newFileList = photograph.slice();
+      newFileList.splice(index, 1);
+    setPhoto(newFileList)
+  },
+  beforeUpload: file => {
+    setPhoto([...photograph, file])
+    return false;
+  },
+  photograph,
+};
 
   return (
-    <div className="container">
+    <div className="container mt-5">
       <div className="row">
-        <div className="col-12">
+        <div className="col-md-6 center m-auto">
           {Object.keys(error).length !== 0 && (
             <div className="alert alert-primary">{error.message}</div>
           )}
-          <form onChange={handleFormChange}>
-            <div className="form-group">
-              <label>Full Name*</label>
-              <input
-                type="name"
-                name="name"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                className="form-control form-control-sm"
-                required
-              />
+
+<Form
+      form={form}
+      layout="vertical"
+      // initialValues={{ requiredMark }}
+      // onValuesChange={onRequiredTypeChange}
+      initialValues={{ family: [""] }}
+      onFinish={onFinish}
+      requiredMark={false}
+    >
+       <Form.Item label="Full Name" name='name' rules={[{ required: true, message: 'Missing Name' }]}>
+        <Input placeholder="John Doe" />
+      </Form.Item>
+      <Form.Item label="Email" name='email' rules={[{ required: true, message: 'not a valid email', type: 'email' }]}>
+        <Input placeholder="test@example.com" />
+      </Form.Item>
+      <Space style={{ display: 'flex'}} align="start">
+
+      <Form.Item label="Date of Birth" name='dateOfBirth'>
+      <DatePicker  format={'DD/MM/YYYY'} />
+      </Form.Item>
+      <Form.Item
+                    
+                    name='age'
+                    label='Age'
+                    rules={[{ required: true, message: 'Missing age' }]}
+                  >
+                    <InputNumber placeholder="Age" />
+                  </Form.Item>
+                  </Space>
+                  <Form.Item
+                    
+                    name='photograph'
+                    label='Photograph'
+                    rules={[{ required: true, message: 'Missing Photograph' }]}
+                  >
+      <Upload {...props}>
+          <Button icon={<UploadOutlined />}>Select File</Button>
+        </Upload>
+</Form.Item>
+
+        <Form.List name="family">
+       
+        {(fields, { add, remove }) => {
+          return (
+            <div>
+              {fields.map(field => (
+                <Space key={field.key} style={{ display: 'flex', marginBottom: 8 }} align="start">
+                  <Form.Item
+                    {...field}
+                    name={[field.name, 'name']}
+                    fieldKey={[field.fieldKey, 'name']}
+                    rules={[{ required: true, message: 'Missing name' }]}
+                  >
+                    <Input placeholder="Full Name" />
+                  </Form.Item>
+                  <Form.Item
+                    {...field}
+                    name={[field.name, 'relationship']}
+                    fieldKey={[field.fieldKey, 'relationship']}
+                    rules={[{ required: true, message: 'Relationship' }]}
+                  >
+                    <Input placeholder="Relationship" />
+                  </Form.Item>
+
+                  <Form.Item
+                    {...field}
+                    name={[field.name, 'age']}
+                    fieldKey={[field.fieldKey, 'age']}
+                    rules={[{ required: true, message: 'Missing age' }]}
+                  >
+                    <InputNumber placeholder="Age" />
+                  </Form.Item>
+
+                  <MinusCircleOutlined
+                    onClick={() => {
+                      remove(field.name);
+                    }}
+                  />
+                </Space>
+              ))}
+   
+              <Form.Item>
+                <Button
+                  type="dashed"
+                  onClick={() => {
+                    add();
+                  }}
+                  block
+                >
+                  <PlusOutlined /> Add family
+                </Button>
+              </Form.Item>
             </div>
-            <div className="form-group">
-              <label>Email Address*</label>
-              <input
-                type="email"
-                name="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                className="form-control form-control-sm"
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Date of Birth*</label>
-              <br></br>
-              <input
-                type="date"
-                onChange={(event) => setDOB(event.target.value)}
-                max={new Date().toISOString().substring(0, 10)}
-                className="form-control form-control-sm"
-              />
-            </div>
-            <div className="form-group">
-              <label>Photograph*</label>
-              <input
-                type="file"
-                name="photograph"
-                className="form-control"
-                onChange={handleFormChange}
-              />
-            </div>
-          </form>
+          );
+        }}
+      
+      </Form.List>
+      <Form.Item>
+        <Button type="primary" htmlType="submit" block>
+          Submit
+        </Button>
+      </Form.Item>
+      </Form>
         </div>
       </div>
     </div>
